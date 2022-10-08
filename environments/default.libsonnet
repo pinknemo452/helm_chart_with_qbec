@@ -4,5 +4,6 @@ local base = import './base.libsonnet';
 
 base {
   components +: {
+    replicaCount: 3
   }
 }

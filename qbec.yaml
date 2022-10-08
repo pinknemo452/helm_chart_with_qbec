@@ -11,14 +11,20 @@ spec:
     computed:
       - name: replaceHelmValues
         code: |
-           local qbecValues = import 'environments/base.libsonnet';
-           local substitutedQbecValues = qbecValues.components;
-           local stdin = std.toString(substitutedQbecValues);
+           local qbecValuesBase = import 'environments/base.libsonnet';
+           local substitutedQbecValuesBase = qbecValuesBase.components;
+           local stdinBase = std.toString(substitutedQbecValuesBase);
+          
+           local qbecValuesDefault = import 'environments/default.libsonnet';
+           local substitutedQbecValuesDefault = qbecValuesDefault.components;
+           local stdinDefault = std.toString(substitutedQbecValuesDefault);
+
+           local combinedStdin = stdinDefault + stdinBase;
            {
             command: 'helm',
-            args: ['template', '--dry-run', '-f', '-' ,'/home/master/nginx'],
+            args: ['template', '--dry-run', '-f', '-','/home/master/nginx'],
             env: {},
-            stdin: stdin,
+            stdin: combinedStdin,
            } 
   dataSources:
     - exec://helmApiResources?configVar=replaceHelmValues
