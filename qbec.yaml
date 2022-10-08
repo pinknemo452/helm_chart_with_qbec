@@ -1,0 +1,24 @@
+apiVersion: qbec.io/v1alpha1
+kind: App
+metadata:
+  name: hahaton
+spec:
+  environments:
+    default:
+      defaultNamespace: default
+      server: https://127.0.0.1:36577
+  vars:
+    computed:
+      - name: replaceHelmValues
+        code: |
+           local qbecValues = import 'environments/base.libsonnet';
+           local substitutedQbecValues = qbecValues.components;
+           local stdin = std.toString(substitutedQbecValues);
+           {
+            command: 'helm',
+            args: ['template', '--dry-run', '-f', '-' ,'/home/master/nginx'],
+            env: {},
+            stdin: stdin,
+           } 
+  dataSources:
+    - exec://helmApiResources?configVar=replaceHelmValues
