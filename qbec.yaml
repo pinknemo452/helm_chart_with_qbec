@@ -3,28 +3,32 @@ kind: App
 metadata:
   name: hahaton
 spec:
+  namespaceTagSuffix: true
   environments:
     default:
       defaultNamespace: default
       server: https://127.0.0.1:36577
+    prod:
+      defaultNamespace: default
+      server: https://192.168.32.131:6443
   vars:
     computed:
       - name: replaceHelmValues
         code: |
-           local qbecValuesBase = import 'environments/base.libsonnet';
-           local substitutedQbecValuesBase = qbecValuesBase.components;
+           local qbecValuesBase = import 'environments/default.libsonnet';
+           local substitutedQbecValuesBase = qbecValuesBase.components.default;
            local stdinBase = std.toString(substitutedQbecValuesBase);
           
            local qbecValuesDefault = import 'environments/default.libsonnet';
-           local substitutedQbecValuesDefault = qbecValuesDefault.components;
+           local substitutedQbecValuesDefault = std.get(qbecValuesDefault.components, std.extVar('qbec.io/tag'), qbecValuesDefault.components.default);
            local stdinDefault = std.toString(substitutedQbecValuesDefault);
 
-           local combinedStdin = stdinDefault + stdinBase;
+           local merged = std.mergePatch(substitutedQbecValuesBase, substitutedQbecValuesDefault);
            {
             command: 'helm',
             args: ['template', '--dry-run', '-f', '-','/home/master/nginx'],
             env: {},
-            stdin: combinedStdin,
+            stdin: std.toString(merged),
            } 
   dataSources:
     - exec://helmApiResources?configVar=replaceHelmValues

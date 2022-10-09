@@ -4,6 +4,17 @@ local base = import './base.libsonnet';
 
 base {
   components +: {
-    replicaCount: 3
-  }
+    default: {
+      replicaCount: 1
+    },
+    prod1: {
+      command: ["prod1", "command"]
+    },
+    prod2: {
+      replicaCount: 5
+    },
+    prod3: {
+      replicaCount: 6
+    },
+  },
 }
