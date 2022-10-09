@@ -1,6 +1,7 @@
 # Helm chart via qbec
+>Disclaimer: this project was developed and established during the [IT_ONE DevOps CHAMPION](https://it-onedevopschampion.ru/) 
 ## Purpose
-
+The purpose of this project is to have the ability to deploy helm chart with diffirent values to various environments. Project uses qbec, k8s and helm.
 ## Setting
 
 **First**, you need to change external variable helmTemplate in `spec.vars.external` in [`qbec.yaml`](qbec.yaml) file to your helm chart (it can be path or link), also change environments
