@@ -4,6 +4,7 @@ metadata:
   name: hahaton
 spec:
   namespaceTagSuffix: true
+
   environments:
     default:
       defaultNamespace: default
@@ -11,27 +12,34 @@ spec:
     prod:
       defaultNamespace: default
       server: https://192.168.32.131:6443
+
   vars:
     external:
       - name: helmTemplate
-        default: '/home/master/nginx'
+        default: /home/master/nginx
+
     computed:
       - name: replaceHelmValues
         code: |
-           local qbecValuesBase = import 'environments/default.libsonnet';
-           local substitutedQbecValuesBase = qbecValuesBase.components.default;
-           local stdinBase = std.toString(substitutedQbecValuesBase);
-          
-           local qbecValuesDefault = import 'environments/default.libsonnet';
-           local substitutedQbecValuesDefault = std.get(qbecValuesDefault.components, std.extVar('qbec.io/tag'), qbecValuesDefault.components.default);
-           local stdinDefault = std.toString(substitutedQbecValuesDefault);
+          local defaultEnv = import 'environments/default.libsonnet';
 
-           local merged = std.mergePatch(substitutedQbecValuesBase, substitutedQbecValuesDefault);
-           {
+          local base = defaultEnv.components.default;
+          local tag = std.extVar('qbec.io/tag');
+          local tagged = std.get(defaultEnv.components, tag, base);
+
+          local merged = std.mergePatch(base, tagged);
+
+          {
             command: 'helm',
-            args: ['template', '--dry-run', '-f', '-', std.extVar('helmTemplate')],
+            args: [
+              'template',
+              '--dry-run',
+              '-f', '-',
+              std.extVar('helmTemplate')
+            ],
             env: {},
             stdin: std.toString(merged),
-           } 
+          }
+
   dataSources:
     - exec://helmApiResources?configVar=replaceHelmValues
